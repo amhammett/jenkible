@@ -1,0 +1,101 @@
+---
+general:
+  app_name: "jenkins"
+
+ec2:
+  instance_type:
+    default:
+      stg: t2.nano
+      prod: t2.micro
+    prime:
+      stg: t2.small
+      prod: t2.medium
+    minion:
+      stg: t2.nano
+      prod: t2.small
+  instance_size:
+    default:
+      stg: 30
+      prod: 80
+    prime:
+      stg: 50
+      prod: 100
+    minion:
+      stg: 50
+      prod: 100
+  public_ip:
+    public: yes
+    private: no
+
+ec2_meta:
+  type:            "{{ec2['instance_type'][ec2_role][aws_account]}}"
+  size:            "{{ec2['instance_size'][ec2_role][aws_account]}}"
+  public_ip:       "{{ec2['public_ip'][ec2_location]}}"
+  subnet_location: "{{ec2_location}}"
+
+jenkins:
+  packages:
+    apt:
+      - ntp
+      - ntpdate
+      - build-essential
+      - git
+      - jenkins
+      - openjdk-7-jre
+      - software-properties-common
+    jpi:
+      - AnsiColor
+      - Build+Pipeline+Plugin
+      - build+timeout+plugin
+      - Delivery+Pipeline+Plugin
+      - CloudBees+Folders+Plugin
+      - Google+Login+Plugin
+      - Git+Plugin
+      - Google+OAuth+Plugin
+      - Pipeline+Plugin
+      - Rebuild+Plugin
+      - Simple+Theme+Plugin
+      - Slack+Plugin
+      - Timestamper
+      - Workspace+Cleanup+Plugin
+
+minion:
+  packages:
+    apt:
+      - ntp
+      - ntpdate
+      - build-essential
+      - git
+      - openjdk-7-jre
+      - software-properties-common
+
+minion_ansible:
+  packages:
+    apt:
+      - ntp
+      - ntpdate
+      - git
+      - python-pip
+      - python-dev
+    pip:
+      - ansible
+      - boto
+      - awscli
+
+minion_node:
+  packages:
+    apt:
+      - ntp
+      - ntpdate
+      - git
+      - build-essential
+      - libssl-dev
+      - libfontconfig1
+      - nodejs
+      - python
+      - python-dev
+      - python-pip
+    pip:
+      - ansible
+      - boto
+      - awscli
