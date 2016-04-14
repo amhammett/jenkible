@@ -1,0 +1,17 @@
+---
+- name: update ubuntu packages
+  apt: update_cache=yes
+  ignore_errors: true
+
+- name: install ubuntu packages
+  apt: name="{{item}}" state=present
+  with_items:
+    - "{{minion_ansible['packages']['apt']}}"
+
+- name: install pips
+  pip: name="pip" state=latest
+
+- name: install pips
+  pip: name="{{item}}" state=present
+  with_items:
+    - "{{minion_ansible['packages']['pip']}}"

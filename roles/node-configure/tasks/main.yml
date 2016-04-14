@@ -1,0 +1,20 @@
+---
+- name: add node apt repo
+  shell: "curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -"
+
+- name: update ubuntu packages
+  apt: update_cache=yes
+  ignore_errors: true
+
+- name: install ubuntu packages
+  apt: name="{{item}}" state=present
+  with_items:
+    - "{{minion_node['packages']['apt']}}"
+
+- name: install pips
+  pip: name="pip" state=latest
+
+- name: install pips
+  pip: name="{{item}}" state=present
+  with_items:
+    - "{{minion_node['packages']['pip']}}"

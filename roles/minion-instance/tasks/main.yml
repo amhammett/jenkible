@@ -1,0 +1,20 @@
+---
+- set_fact:
+    ec2_role:          "prime"
+    ec2_instance_size: "{{ec2['instance_type']['default'][aws_account]}}"
+    ec2_location:      "public" # public or private
+    ingress_rules:
+      - proto:     tcp
+        from_port: 22
+        to_port:   22
+        cidr_ip:   "{{vpc.cidr}}"
+      - proto:     tcp
+        from_port: 8080
+        to_port:   8080
+        cidr_ip:   "{{vpc.cidr}}"
+    egress_rules:
+      - proto:     all
+        cidr_ip:   0.0.0.0/0
+
+
+- include: "{{playbook_dir}}/roles/ec2-provision/tasks/main.yml"

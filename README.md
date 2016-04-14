@@ -43,3 +43,12 @@ The secrets are stored in `./vars/secrets.yml` the file's password is not `notpa
 
 - ssh keys
 - other secrets
+
+
+## ERROR!
+
+```bash
+ERROR! The file ./inventory/ec2.py is marked as executable
+```
+
+either you didn't specify aws_account or your aws_account wasn't found in `~/.aws/credentials`

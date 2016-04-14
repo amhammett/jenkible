@@ -1,0 +1,20 @@
+---
+- name: register key pair
+  ec2_key:
+    name: "{{general['app_name']}}-{{aws_account}}"
+    key_material: "{{ssh_keys['orchestration']['public'][aws_account]}}"
+    region: "{{aws_region}}"
+    state: present
+
+- name: query for ubuntu ami
+  shell: >
+    aws --profile {{aws_account}} --region {{aws_region}}
+    ec2 describe-images
+    --owners 099720109477
+    --filters "Name=virtualization-type,Values=hvm" "Name=name,Values='*hvm-ssd/ubuntu-trusty-14.04*'"
+    --query 'sort_by(Images, &Name)[-1].ImageId'
+    --output text
+  changed_when: false
+  register: shell_ubuntu_ami_lookup
+
+- set_fact: ubuntu_ami="{{shell_ubuntu_ami_lookup.stdout}}"

@@ -14,7 +14,6 @@
     - network-layout
     - ec2-security
     - jenkins-instance
-    - jenkins-loadbalance
 
 - name: configure jenkins environments
   hosts: "dyn_jenkins_{{env}}_prime"

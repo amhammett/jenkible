@@ -1,0 +1,24 @@
+---
+- name: download jenkins cli
+  get_url: url=http://localhost:8080/jnlpJars/jenkins-cli.jar  dest=~/jenkins-cli.jar mode=0700
+
+- name: template groovy-auth script
+  template: src="{{playbook_dir}}/roles/jenkins-deploy/templates/jenkins-first-auth.gvy.j2" dest="jenkins-first-auth.gvy"
+
+- name: enable security (if none set)
+  script: "java -jar jenkins-cli.jar -s http://localhost:8080 groovy jenkins-first-auth.gvy"
+
+- name: clean up
+  with_items:
+    - jenkins-first-auth.gvy
+  file: path="{{item}}" state=absent
+
+- name: download plugins
+  with_items: "{{jenkins['packages']['jpi']}}"
+  get_url: dest="~/plugins/{{item.name|mandatory}}.jpi"
+           url="https://updates.jenkins-ci.org/latest/{{item.name}}.hpi"
+           owner=jenkins group=jenkins mode=0644
+  notify: jenkins-reload
+
+- name: verify jenkins process
+  shell: "ps aux | grep [j]enkins"

@@ -1,0 +1,16 @@
+---
+- name: ec2 wait
+  shell: >
+    aws --profile {{account}} --region {{region}}
+    ec2 describe-instances
+    --filters
+    "Name=tag:Service,Values={{general['app_name']}}"
+    "Name=tag:Environment,Values={{env}}"
+    "Name=tag:Role,Values={{ec2_role}}"
+    --query "Reservations[*].Instances[*].State.Name"
+    --output=text
+  changed_when: false
+  register: shell_ec2_instance_lookup
+  until: "{{shell_ec2_instance_lookup.stdout}} == 'Running'"  
+  retries: 6
+  delay: 20

@@ -1,0 +1,80 @@
+---
+- name: create security group for {{ec2_role}} instances
+  ec2_group:
+    name: "{{general['app_name']}}-{{env}}-{{ec2_role}}"
+    description: "security group for {{ec2_role}} nodes"
+    region: "{{aws_region}}"
+    vpc_id: "{{vpc['id']|mandatory}}"
+    purge_rules: true
+    rules: "{{ingress_rules}}"
+    profile: "{{aws_account}}"
+    purge_rules_egress: true
+    rules_egress: "{{egress_rules}}"
+
+- name: query for {{ec2_role}} security group id
+  shell: >
+    aws --profile {{aws_account}} --region {{aws_region}}
+    ec2 describe-security-groups
+    --filters "Name=group-name,Values={{general['app_name']}}-{{env}}-{{ec2_role}}"
+    --query "SecurityGroups[*].GroupId"
+    --output text
+  changed_when: false
+  register: shell_role_security_groups_lookup
+
+- name: verify if {{ec2_role}} instances exists
+  shell: >
+    aws --profile {{aws_account}} --region {{aws_region}}
+    ec2 describe-instances
+    --filters
+    "Name=tag:Service,Values={{general['app_name']}}"
+    "Name=tag:Environment,Values={{env}}"
+    "Name=tag:Role,Values={{ec2_role}}"
+    --query "Reservations[*].Instances[*].State.Name"
+    --output=text
+  changed_when: false
+  register: shell_role_lookup
+
+- name: provision {{ec2_role}} instances... please wait
+  ec2:
+    group_id: "{{shell_role_security_groups_lookup.stdout}}"
+    key_name: "{{general['app_name']}}-{{aws_account}}"
+    assign_public_ip: "{{ec2_meta.public_ip}}"
+    image: "{{ubuntu_ami}}"
+    instance_tags:
+      Name: "{{general['app_name']}}-{{env}}-{{ec2_role}}"
+      Environment: "{{env}}"
+      Role: "{{ec2_role}}"
+      Service: "{{general['app_name']}}"
+    instance_type: "{{ec2_meta.type}}"
+    profile: "{{aws_account}}"
+    region: "{{aws_region}}"
+    user_data: "{{lookup('template', '{{playbook_dir}}/roles/ec2-provision/templates/user-data.j2')}}"
+    vpc_subnet_id: "{{subnet_lookup[subnet_list[ec2_meta.subnet_location]|random]}}"
+    wait: true
+  notify: ec2 wait
+  when:
+   - shell_role_lookup.stdout is defined
+   - "not 'running' in shell_role_lookup.stdout"
+
+- name: wait until the instance is ready to use
+  shell: >
+    aws --region={{aws_region}} --profile={{aws_account}}
+    ec2 describe-instances
+    --filter
+    "Name=tag:Service,Values={{general['app_name']}}"
+    "Name=tag:Environment,Values={{env}}"
+    --query "Reservations[*].Instances[*].State.Name"
+    --output text
+  register: shell_instance_ready
+  until: "'{{shell_instance_ready.stdout}}' == 'running'"
+
+- name: clear cache
+  shell: >
+    AWS_PROFILE={{aws_account}}
+    {{playbook_dir}}/inventory/ec2.py
+    --refresh-cache
+    | grep "{{general['app_name']}}_{{env}}_{{ec2_role}}"
+  register: shell_cache_ready
+  until: "'{{shell_cache_ready.rc}}' == '0'"
+
+- meta: refresh_inventory

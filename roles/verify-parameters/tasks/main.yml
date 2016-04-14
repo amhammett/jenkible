@@ -1,0 +1,5 @@
+---
+- name: verify supplied arguments
+  fail: msg="argument missing... {{item}}"
+  when: "{{item}} is undefined"
+  with_items: "{{param_list}}"

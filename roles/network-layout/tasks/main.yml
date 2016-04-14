@@ -1,0 +1,82 @@
+---
+#TODO: this should be possible in one request
+- name: query for vpc id
+  shell: >
+    aws --profile {{aws_account}} --region {{aws_region}}
+    ec2 describe-vpcs
+    --query "Vpcs[0].VpcId"
+    --output text
+  changed_when: false
+  register: shell_vpc_id_lookup
+
+- name: query vpc cidr 
+  shell: >
+    aws --profile {{aws_account}} --region {{aws_region}}
+    ec2 describe-vpcs
+    --query "Vpcs[0].CidrBlock"
+    --output text
+  changed_when: false
+  register: shell_vpc_cidr_lookup
+
+- set_fact: 
+    vpc:
+      id:   "{{shell_vpc_id_lookup.stdout|mandatory}}"
+      cidr: "{{shell_vpc_cidr_lookup.stdout|mandatory}}"
+- debug: var=vpc
+
+# this is a horrible and also should be possible in one request
+- name: query for subnets public a
+  shell: >
+    aws --profile {{aws_account}} --region {{aws_region}}
+    ec2 describe-subnets
+    --filters "Name=tag:Name,Values=public-a"
+    --query "Subnets[*].SubnetId"
+    --output text
+  changed_when: false
+  register: shell_subnet_lookup_public_a
+
+- name: query for subnets public b
+  shell: >
+    aws --profile {{aws_account}} --region {{aws_region}}
+    ec2 describe-subnets
+    --filters "Name=tag:Name,Values=public-b"
+    --query "Subnets[*].SubnetId"
+    --output text
+  changed_when: false
+  register: shell_subnet_lookup_public_b
+
+- name: query for subnets private a
+  shell: >
+    aws --profile {{aws_account}} --region {{aws_region}}
+    ec2 describe-subnets
+    --filters "Name=tag:Name,Values=private-a"
+    --query "Subnets[*].SubnetId"
+    --output text
+  changed_when: false
+  register: shell_subnet_lookup_private_a
+
+- name: query for subnets private b
+  shell: >
+    aws --profile {{aws_account}} --region {{aws_region}}
+    ec2 describe-subnets
+    --filters "Name=tag:Name,Values=private-b"
+    --query "Subnets[*].SubnetId"
+    --output text
+  changed_when: false
+  register: shell_subnet_lookup_private_b
+
+- set_fact:
+    subnet_lookup:
+     private-a: "{{shell_subnet_lookup_private_a.stdout|mandatory}}"
+     private-b: "{{shell_subnet_lookup_private_b.stdout|mandatory}}"
+     public-a: "{{shell_subnet_lookup_public_a.stdout|mandatory}}"
+     public-b: "{{shell_subnet_lookup_public_b.stdout|mandatory}}"
+- debug: var=subnet_lookup
+- set_fact:
+    subnet_list:
+      private:
+        - "private-a"
+        - "private-b"
+      public:
+        - "public-a"
+        - "public-b"
