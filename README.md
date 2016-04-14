@@ -20,6 +20,18 @@ hosts created will be in the form of `jenkins-{{env}}-{{instance-type}}`
 
 ## Requirements
 
-These playbooks expect that you have your aws profile credentials configured in `~/.aws/credentials`
+These playbooks expect that you have your
 
-These credentials should map to the aws_account variable defined above
+- aws profile credentials configured in `~/.aws/credentials`. These credentials should map to the aws_account variable defined above
+- ssh keys stored within `~/.ssh/id_rsa.jenkins-{{aws_account}}`. These keys are used by ansible and set within the dynamic inventory
+
+## Dynamic Inventory
+
+See `./inventory` for more information. Current setup limits hosts that match `dyn_jenkins_{{env}}_prime` for jenkins prime servers
+
+
+## Keys and Access
+
+One key-pair is created per account.
+
+

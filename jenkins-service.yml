@@ -1,0 +1,9 @@
+---
+- name: jenkins service
+  hosts: "dyn_jenkins_{{env}}_prime"
+
+  become: yes
+
+  tasks:
+    - name: jenkins service [started|stopped|restarted|reloaded]
+      service: name=jenkins state={{state|mandatory}}
