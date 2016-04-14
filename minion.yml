@@ -1,0 +1,29 @@
+---
+- name: provision jenkins minion
+  hosts: localhost
+
+  connection: local
+  gather_facts: no
+
+  vars_files:
+   - vars/common.yml
+   - vars/secrets.yml
+
+  roles:
+    - { role: verify-parameters, param_list: [ "aws_region", "aws_account", "env" ] }
+    - network-layout
+    - ec2-security
+    - minion-instance
+
+- name: configure jenkins minion
+  hosts: "dyn_jenkins_{{env}}_minion"
+
+  become: yes
+
+  vars_files:
+   - vars/common.yml
+   - vars/secrets.yml
+
+  roles:
+    - { role: verify-parameters, param_list: [ "aws_region", "aws_account", "env" ] }
+    - minion-configure

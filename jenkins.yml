@@ -1,0 +1,31 @@
+---
+- name: provision jenkins environment
+  hosts: localhost
+
+  connection: local
+  gather_facts: no
+
+  vars_files:
+   - vars/common.yml
+   - vars/secrets.yml
+
+  roles:
+    - { role: verify-parameters, param_list: [ "aws_region", "aws_account", "env" ] }
+    - network-layout
+    - ec2-security
+    - jenkins-instance
+    - jenkins-loadbalance
+
+- name: configure jenkins environments
+  hosts: "dyn_jenkins_{{env}}_prime"
+
+  become: yes
+
+  vars_files:
+   - vars/common.yml
+   - vars/secrets.yml
+
+  roles:
+    - { role: verify-parameters, param_list: [ "aws_region", "aws_account", "env" ] }
+    - jenkins-configure
+    - jenkins-deploy
