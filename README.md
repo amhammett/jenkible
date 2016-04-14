@@ -35,3 +35,11 @@ See `./inventory` for more information. Current setup limits hosts that match `d
 One key-pair is created per account.
 
 
+## Vault
+
+The secrets are stored in `./vars/secrets.yml` the file's password is not `notpassword`... or is it?
+
+`Secrets.yml` is used to keep
+
+- ssh keys
+- other secrets
