@@ -1,5 +1,5 @@
-Jenkins-Ansible
-===============
+Jenkible
+========
 
 Sample ansible code to provision, configure and deploy jenkins and minion hosts
 
