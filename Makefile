@@ -1,4 +1,4 @@
-VAULT_PASSWORD_FILE = --vault-password-file ~/.secrets/hendricks.vault
+VAULT_PASSWORD_FILE = --vault-password-file ~/.secrets/jenkins.vault
 ANSIBLE_VAULT = $(shell which "ansible-vault" 2>/dev/null || echo "/usr/bin/ansible-vault" ) ${VAULT_PASSWORD_FILE}
 ANSIBLE_PLAYBOOK = $(shell which "ansible-playbook" 2>/dev/null || echo "/usr/bin/ansible-playbook" )
 ANSIBLE_CMD = ${ANSIBLE_PLAYBOOK} ${VAULT_PASSWORD_FILE}
