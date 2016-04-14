@@ -1,0 +1,11 @@
+---
+- name: apply ansible configuration to minion
+  hosts: "dyn_jenkins_{{env}}_minion"
+
+  vars_files:
+   - vars/common.yml
+
+  become: yes
+
+  roles:
+    - node-configure
