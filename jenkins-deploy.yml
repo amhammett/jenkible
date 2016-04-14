@@ -1,0 +1,14 @@
+---
+- name: configure jenkins environments
+  hosts: "dyn_jenkins_{{env}}_prime"
+
+  become: yes
+
+  vars_files:
+   - vars/common.yml
+   - vars/secrets.yml
+
+  roles:
+    - { role: verify-parameters, param_list: [ "aws_region", "aws_account", "env" ] }
+    - jenkins-configure
+    - jenkins-deploy
